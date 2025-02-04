@@ -409,9 +409,9 @@ ninja.data = [{
           window.location.href = "/blog/2015/code/";
         
       },
-    },{id: "post-book-review-the-structure-of-scientific-revolutions",
+    },{id: "post-the-structure-of-scientific-revolutions",
       
-        title: "Book Review: The Structure of Scientific Revolutions",
+        title: "The Structure of Scientific Revolutions",
       
       description: "A review of The Structure of Scientific Revolutions by Thomas Kuhn",
       section: "Posts",
