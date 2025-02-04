@@ -79,18 +79,7 @@ ninja.data = [{
               handler: () => {
                 window.location.href = "/blog/";
               },
-            },{id: "post-",
-      
-        title: "",
-      
-      description: "",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2025/2025-02-04-ssr_book/";
-        
-      },
-    },{id: "post-a-post-with-image-galleries",
+            },{id: "post-a-post-with-image-galleries",
       
         title: "a post with image galleries",
       
@@ -418,6 +407,17 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2015/code/";
+        
+      },
+    },{id: "post-book-review-the-structure-of-scientific-revolutions",
+      
+        title: "Book Review: The Structure of Scientific Revolutions",
+      
+      description: "A review of The Structure of Scientific Revolutions by Thomas Kuhn",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2015/ssr_book/";
         
       },
     },{id: "post-a-post-with-images",
