@@ -14,11 +14,20 @@
 <nav class="nav">
   <div class="wrap">
     <a href="{{ '/' | relative_url }}" class="brand">Fazlur</a>
-    <div class="links">
-      {% assign nav_path = page.url | split: '/' | compact | first %}
-      <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}class="active"{% endif %}>About</a>
-      <a href="{{ '/research/' | relative_url }}" {% if nav_path == 'research' %}class="active"{% endif %}>Research</a>
-      <a href="{{ '/blog/' | relative_url }}" {% if nav_path == 'blog' %}class="active"{% endif %}>Blog</a>
+    <div class="nav-right">
+      <div class="links">
+        {% assign nav_path = page.url | split: '/' | compact | first %}
+        <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}class="active"{% endif %}>About</a>
+        <a href="{{ '/research/' | relative_url }}" {% if nav_path == 'research' %}class="active"{% endif %}>Research</a>
+        <a href="{{ '/blog/' | relative_url }}" {% if nav_path == 'blog' %}class="active"{% endif %}>Blog</a>
+      </div>
+      <div class="social">
+        {% for s in site.data.social %}
+          <a href="{{ s.url }}" target="_blank" rel="noreferrer" title="{{ s.name }} · {{ s.handle }}" aria-label="{{ s.name }}">
+            {% include icon.html name=s.icon %}
+          </a>
+        {% endfor %}
+      </div>
     </div>
   </div>
 </nav>
@@ -32,8 +41,9 @@
     if (t) {
       const id = t.getAttribute('data-bibtex-toggle');
       const el = document.getElementById(id);
+      if (!t.dataset.label) t.dataset.label = t.textContent.trim();
       el.hidden = !el.hidden;
-      t.textContent = el.hidden ? 'BibTeX' : 'Hide';
+      t.textContent = el.hidden ? t.dataset.label : 'Hide';
       return;
     }
     const c = e.target.closest('[data-bibtex-copy]');
@@ -47,6 +57,58 @@
       });
     }
   });
+
+  // Blog tag filter
+  (() => {
+    const filter = document.querySelector('.tag-filter');
+    const list = document.querySelector('.post-list');
+    if (!filter || !list) return;
+    const items = list.querySelectorAll('li');
+    filter.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tag-chip');
+      if (!btn) return;
+      const tag = btn.dataset.tag;
+      filter.querySelectorAll('.tag-chip').forEach(b => b.classList.toggle('is-active', b === btn));
+      items.forEach(li => {
+        const tags = (li.dataset.tags || '').split(' ').filter(Boolean);
+        const show = tag === '*' || tags.includes(tag);
+        li.classList.toggle('is-hidden', !show);
+      });
+    });
+  })();
+
+  // Live chess.com ratings (fetches on every page load, falls back to YAML)
+  (async () => {
+    const root = document.querySelector('[data-chess-user]');
+    if (!root) return;
+    const user = root.getAttribute('data-chess-user');
+    try {
+      const res = await fetch(`https://api.chess.com/pub/player/${user}/stats`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const s = await res.json();
+      const modes = { rapid: s.chess_rapid, blitz: s.chess_blitz, bullet: s.chess_bullet };
+      for (const [m, d] of Object.entries(modes)) {
+        if (!d) continue;
+        const li = root.querySelector(`[data-mode="${m}"]`);
+        if (!li) continue;
+        const cur  = d.last && d.last.rating;
+        const best = d.best && d.best.rating;
+        const curEl  = li.querySelector('.chess-current');
+        const bestEl = li.querySelector('.chess-best');
+        if (cur  && curEl)  curEl.textContent  = cur;
+        if (best && bestEl) bestEl.textContent = `peak ${best}`;
+      }
+      const updated = root.querySelector('.chess-updated');
+      if (updated) {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        updated.textContent = `Updated just now · ${now.toISOString().slice(0,10)} ${hh}:${mm}`;
+      }
+    } catch (_) {
+      // network / CORS / chess.com down → YAML fallback stays visible
+    }
+  })();
 </script>
 
 </body>

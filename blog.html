@@ -8,30 +8,54 @@ permalink: /blog/
   <section class="hero">
     <h1>Blog</h1>
     <p class="section-intro">
-      Personal notes, travel memoirs, and occasional musings. Some are ported from my old
+      Thoughts, thoughts, and thoughts. Some are ported from my old
       <a href="https://fazlurnucom.wordpress.com/" target="_blank" rel="noreferrer">WordPress blog</a>.
     </p>
   </section>
 </header>
 
 <main class="wrap">
+  {% assign all_tags = "" | split: "" %}
+  {% for post in site.posts %}
+    {% for t in post.tags %}
+      {% assign all_tags = all_tags | push: t %}
+    {% endfor %}
+  {% endfor %}
+  {% assign unique_tags = all_tags | uniq | sort %}
+
+  {% if unique_tags.size > 0 %}
+    <div class="tag-filter" role="group" aria-label="Filter posts by tag">
+      <button class="tag-chip is-active" data-tag="*">All <span class="count">{{ site.posts.size }}</span></button>
+      {% for t in unique_tags %}
+        {% assign count = all_tags | where_exp: "x", "x == t" | size %}
+        <button class="tag-chip" data-tag="{{ t | slugify }}">{{ t }} <span class="count">{{ count }}</span></button>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <ul class="post-list">
     {% for post in site.posts %}
-      <li>
-        <span class="title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></span>
-        <span class="meta">{{ post.date | date: "%Y-%m-%d" }}{% if post.tags.size > 0 %} · {{ post.tags | join: ", " }}{% endif %}</span>
-        {% if post.excerpt %}<p class="excerpt">{{ post.excerpt | strip_html }}</p>{% endif %}
+      {% assign tag_slugs = "" %}
+      {% for t in post.tags %}{% assign tag_slugs = tag_slugs | append: " " | append: t | slugify %}{% endfor %}
+      <li data-tags="{{ tag_slugs | strip }}">
+        <span class="date">{{ post.date | date: "%Y-%m-%d" }}</span>
+        <a class="title" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        {% if post.tags.size > 0 %}
+          <span class="tags">
+            {% for t in post.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+          </span>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
 
-  <p class="muted small" style="margin-top:24px;">
+  <!-- <p class="muted small" style="margin-top:24px;">
     To add a new post, drop a Markdown file in <code>_posts/</code> named
     <code>YYYY-MM-DD-slug.md</code> with front matter
     (<code>title</code>, <code>date</code>, <code>tags</code>, <code>excerpt</code>).
-  </p>
+  </p> -->
 
   <footer class="footer">
-    <p>© <span class="mono">Muhammad Fazlur Rahman</span> · No template, just vibe coding</p>
+    <p>© <span class="mono">Muhammad Fazlur Rahman</span></p>
   </footer>
 </main>

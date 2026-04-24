@@ -10,7 +10,7 @@ permalink: /research/
     <p class="section-intro">
       My work sits at the intersection of Unmanned Traffic Management (UTM), conflict
       detection and resolution, and aviation data. Below: peer-reviewed publications,
-      recent activities &amp; service, and a few unpublished-but-fun notes.
+      recent activities &amp; service, and a few none peer-reviewed notes.
     </p>
   </section>
 </header>
@@ -44,7 +44,7 @@ permalink: /research/
   <!-- 2. ACTIVITIES (includes service) -->
   <section id="activities">
     <h2>2. Activities &amp; Service</h2>
-    <p class="section-intro">Talks, workshops, awards, and service items are tagged inline.</p>
+    <p class="section-intro">Papers, conferences, and other items are tagged inline.</p>
     <div class="activities-scroll">
       <ul class="activities">
         {% for a in site.data.activities %}
@@ -52,6 +52,7 @@ permalink: /research/
             <span class="date">{{ a.date }}</span>
             <span class="text">
               <span class="kind kind-{{ a.kind }}">{{ a.kind }}</span>
+              {% if a.kind == 'award' %}<span class="trophy">{% include icon.html name="trophy" %}</span>{% endif %}
               {{ a.text }}
             </span>
           </li>
@@ -62,23 +63,33 @@ permalink: /research/
 
   <!-- 3. NOT PUBLISHED BUT FUN -->
   <section id="fun">
-    <h2>3. Not published, but fun!</h2>
+    <h2>3. Some Technical Notes / Personal Projects</h2>
     <p class="section-intro">
-      Short notes, sketches, and side explorations — things I find interesting but
-      didn't send through peer review. Each linked as a PDF.
+      Short notes, sketches, and side/past personal projects — things I find interesting but
+      didn't send through peer review. Linked to the full write-up (PDF or blog post).
     </p>
-    <ul class="fun-list">
-      {% for f in site.data.fun %}
-        <li>
-          <a class="title" href="{{ f.url | relative_url }}">{{ f.title }}</a>
-          <span class="date mono">{{ f.date }}</span>
-          <p class="desc">{{ f.desc }}</p>
-        </li>
-      {% endfor %}
-    </ul>
+    <div class="fun-scroll">
+      <ul class="fun-list">
+        {% for f in site.data["side-research"] %}
+          {% assign fid = "note-bib-" | append: forloop.index %}
+          <li>
+            <a class="title" href="{{ f.url | relative_url }}">{{ f.title }}</a>
+            <span class="date mono">{{ f.date }}</span>
+            <p class="desc">{{ f.desc }}</p>
+            {% if f.bibtex %}
+              <div class="bibtex-row">
+                <button class="btn-ghost" data-bibtex-toggle="{{ fid }}">Cite</button>
+                <button class="btn-ghost" data-bibtex-copy="{{ fid }}">Copy</button>
+              </div>
+              <pre class="bibtex" id="{{ fid }}" hidden><code>{{ f.bibtex }}</code></pre>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
   </section>
 
   <footer class="footer">
-    <p>© <span class="mono">Muhammad Fazlur Rahman</span> · No template, just vibe coding</p>
+    <p>© <span class="mono">Muhammad Fazlur Rahman</span></p>
   </footer>
 </main>

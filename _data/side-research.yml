@@ -1,0 +1,42 @@
+- title: "Rare-event simulation, a personal note"
+  date: "2025-07-16"
+  url: "/research/pdfs/Note___Rare_Event_Simulation.pdf"
+  desc: "I learned rare-event simulation and fascinated by the math behind it. This can be explored for ATM aplications."
+  bibtex: |
+    @misc{rahmanRareEvent2025,
+      title  = {Rare-event simulation, a personal note},
+      author = {Rahman, Muhammad Fazlur},
+      year   = {2025},
+      month  = {jul},
+      url    = {https://fazlurnu.github.io/research/pdfs/Note___Rare_Event_Simulation.pdf},
+      note   = {Personal note}
+    }
+
+- title: "Magnetometer calibration using Levenberg-Marquardt algorithm"
+  date: "2021-09-01"
+  url: "/research/pdfs/sphere_fit_levenberg_marquardt.pdf"
+  desc: "This was part of my work at ACSL, where I did a magnetometer calibration for drones."
+  bibtex: |
+    @misc{rahmanMagnetometer2021,
+      title  = {Magnetometer calibration using {L}evenberg--{M}arquardt algorithm},
+      author = {Rahman, Muhammad Fazlur},
+      year   = {2021},
+      month  = {sep},
+      url    = {https://fazlurnu.github.io/research/pdfs/sphere_fit_levenberg_marquardt.pdf},
+      note   = {Personal note}
+    }
+
+- title: "Text Extraction from a Table Image"
+  date: "2020-06-23"
+  url: "https://fazlurnucom.wordpress.com/2020/06/23/text-extraction-from-a-table-image-using-pytesseract-and-opencv/"
+  desc: 'This was before LLMs/VLMs were cool — I extracted text from a table image using PyTesseract and OpenCV. Featured in the <a href="https://tesseract-ocr.github.io/tessdoc/ImproveQuality#tables-recognitions" target="_blank" rel="noreferrer">official Tesseract documentation</a>.'
+  bibtex: |
+    @misc{rahmanTableOCR2020,
+      title        = {Text Extraction from a Table Image using {PyTesseract} and {OpenCV}},
+      author       = {Rahman, Muhammad Fazlur},
+      year         = {2020},
+      month        = {jun},
+      howpublished = {Blog post},
+      url          = {https://fazlurnucom.wordpress.com/2020/06/23/text-extraction-from-a-table-image-using-pytesseract-and-opencv/},
+      note         = {Referenced in the Tesseract OCR documentation}
+    }

@@ -1,0 +1,21 @@
+# Jekyll build output
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
+# Ruby / Bundler (if you install Jekyll locally)
+vendor/
+.bundle/
+Gemfile.lock
+
+# Private maintenance notes (not published, not committed)
+maintenance.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp

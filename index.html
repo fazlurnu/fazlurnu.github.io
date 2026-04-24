@@ -5,7 +5,7 @@ title: About
 
 <header class="wrap">
   <section id="top" class="hero">
-    <h1>Muhammad Fazlur Rahman</h1>
+    <h1>About Me</h1>
 
     <div class="about">
       <div class="about-text">
@@ -23,8 +23,10 @@ title: About
 
         <p class="note">
           I earned my Master's degree in Aerospace Systems and Control from
-          ISAE-SUPAERO 🇫🇷, and my Bachelor of Science in Aeronautics and Astronautics
-          from Institut Teknologi Bandung 🇮🇩.
+          ISAE-SUPAERO 🇫🇷, with a thesis on vision-based precision landing for drones.
+          Before that, I obtained my Bachelor of Science in Aeronautics and Astronautics
+          from Institut Teknologi Bandung 🇮🇩, where my final project was an
+          <a href="https://www.youtube.com/watch?v=JQ612zsfXTM" target="_blank" rel="noreferrer">ellipsoid-based obstacle avoidance system for drones</a>.
         </p>
       </div>
 
@@ -37,56 +39,6 @@ title: About
 
 <main class="wrap">
 
-  <!-- CONTACT -->
-  <section id="contact">
-    <h2>Contact</h2>
-    <ul class="contact-list">
-      {% for s in site.data.social %}
-        <li>
-          <a href="{{ s.url }}" target="_blank" rel="noreferrer">
-            {% include icon.html name=s.icon %}
-            <span class="contact-name">{{ s.name }}</span>
-            <span class="contact-handle">{{ s.handle }}</span>
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  </section>
-
-  <!-- CHESS RATING WIDGET -->
-  <section id="chess">
-    <h2>Chess rating <span class="muted small">· live from chess.com</span></h2>
-    <div class="chess-grid">
-      {% assign modes = "rapid,blitz,bullet" | split: "," %}
-      {% for m in modes %}
-        {% assign data = site.data.chess[m] %}
-        <a class="chess-card" href="https://www.chess.com/stats/{{ m }}/toko_material" target="_blank" rel="noreferrer">
-          {% include icon.html name=m %}
-          <div class="chess-mode">{{ m | capitalize }}</div>
-          <div class="chess-current">{{ data.current | default: "—" }}</div>
-          <div class="chess-best">peak <strong>{{ data.best | default: "—" }}</strong></div>
-        </a>
-      {% endfor %}
-    </div>
-    <p class="muted small">Updated {{ site.data.chess.updated }} · refreshed weekly</p>
-  </section>
-
-  <!-- AWARDS -->
-  <section id="awards">
-    <h2>Awards</h2>
-    <ul class="awards-list">
-      {% for a in site.data.awards %}
-        <li>
-          <span class="date mono">{{ a.year }}</span>
-          <span class="text">
-            {% if a.url %}<a href="{{ a.url }}" target="_blank" rel="noreferrer">{{ a.title }}</a>{% else %}{{ a.title }}{% endif %}
-            {% if a.detail %}<span class="muted">· {{ a.detail }}</span>{% endif %}
-          </span>
-        </li>
-      {% endfor %}
-    </ul>
-  </section>
-
   <!-- LANGUAGES -->
   <section id="languages">
     <h2>Languages</h2>
@@ -98,7 +50,27 @@ title: About
     </ul>
   </section>
 
+  <!-- CHESS RATING -->
+  <section id="chess" data-chess-user="toko_material">
+    <h2>Chess rating</h2>
+    <ul class="chess-list">
+      {% assign modes = "rapid,blitz,bullet" | split: "," %}
+      {% for m in modes %}
+        {% assign data = site.data.chess[m] %}
+        <li data-mode="{{ m }}">
+          <a href="https://www.chess.com/member/toko_material/stats/{{ m }}" target="_blank" rel="noreferrer">
+            {% include icon.html name=m %}
+            <span class="chess-mode">{{ m | capitalize }}</span>
+            <span class="chess-current">{{ data.current | default: "—" }}</span>
+            <span class="chess-best">peak {{ data.best | default: "—" }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="muted small"><span class="chess-updated">Updated {{ site.data.chess.updated }}</span></p>
+  </section>
+
   <footer class="footer">
-    <p>© <span class="mono">Muhammad Fazlur Rahman</span> · No template, just vibe coding</p>
+    <p>© <span class="mono">Muhammad Fazlur Rahman</span></p>
   </footer>
 </main>
