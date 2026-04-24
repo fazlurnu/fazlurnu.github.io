@@ -1,0 +1,84 @@
+---
+layout: default
+title: Research
+permalink: /research/
+---
+
+<header class="wrap">
+  <section class="hero">
+    <h1>Research</h1>
+    <p class="section-intro">
+      My work sits at the intersection of Unmanned Traffic Management (UTM), conflict
+      detection and resolution, and aviation data. Below: peer-reviewed publications,
+      recent activities &amp; service, and a few unpublished-but-fun notes.
+    </p>
+  </section>
+</header>
+
+<main class="wrap">
+
+  <!-- 1. PUBLICATIONS -->
+  <section id="publications">
+    <h2>1. Publications</h2>
+    <ul class="pub-list">
+      {% for p in site.data.publications %}
+        {% assign pid = "bib-" | append: forloop.index %}
+        <li>
+          <a class="title" href="{{ p.url }}" target="_blank" rel="noreferrer">{{ p.title }}</a>
+          <div class="venue">{{ p.authors }} · {{ p.venue }} · {{ p.year }}</div>
+          {% if p.bibtex %}
+            <div class="bibtex-row">
+              <button class="btn-ghost" data-bibtex-toggle="{{ pid }}">BibTeX</button>
+              <button class="btn-ghost" data-bibtex-copy="{{ pid }}">Copy</button>
+            </div>
+            <pre class="bibtex" id="{{ pid }}" hidden><code>{{ p.bibtex }}</code></pre>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="muted small" style="margin-top:10px;">
+      Full list on <a href="https://scholar.google.com/citations?hl=en&user=nDi6gp0AAAAJ" target="_blank" rel="noreferrer">Google Scholar</a>.
+    </p>
+  </section>
+
+  <!-- 2. ACTIVITIES (includes service) -->
+  <section id="activities">
+    <h2>2. Activities &amp; Service</h2>
+    <p class="section-intro">Talks, workshops, awards, and service items are tagged inline.</p>
+    <div class="activities-scroll">
+      <ul class="activities">
+        {% for a in site.data.activities %}
+          <li>
+            <span class="date">{{ a.date }}</span>
+            <span class="text">
+              <span class="kind kind-{{ a.kind }}">{{ a.kind }}</span>
+              {{ a.text }}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3. NOT PUBLISHED BUT FUN -->
+  <section id="fun">
+    <h2>3. Not published, but fun!</h2>
+    <p class="section-intro">
+      Short notes, sketches, and side explorations — things I find interesting but
+      didn't send through peer review. Each linked as a PDF.
+    </p>
+    <ul class="fun-list">
+      {% for f in site.data.fun %}
+        <li>
+          <a class="title" href="{{ f.url | relative_url }}">{{ f.title }}</a>
+          <span class="date mono">{{ f.date }}</span>
+          <p class="desc">{{ f.desc }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <p>© <span class="mono">Muhammad Fazlur Rahman</span> · No template, just vibe coding</p>
+  </footer>
+</main>

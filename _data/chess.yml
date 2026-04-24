@@ -1,0 +1,12 @@
+# Auto-updated weekly by .github/workflows/update-chess.yml
+# Values below are placeholders until the first run.
+rapid:
+  current: 2000
+  best: 2049
+blitz:
+  current: 2000
+  best: 2080
+bullet:
+  current: 2000
+  best: 2216
+updated: "2026-04-24"

@@ -1,0 +1,14 @@
+- title: "A back-of-envelope model for drone delivery conflict rates"
+  date: "2025-03-14"
+  url: "/research/pdfs/placeholder.pdf"
+  desc: "Quick Fermi estimate of how often two delivery drones meet in a dense urban airspace, using a gas-kinetic analogy."
+
+- title: "Why ADS-B coverage maps lie (and how to read them anyway)"
+  date: "2024-11-02"
+  url: "/research/pdfs/placeholder.pdf"
+  desc: "Short piece exploring receiver bias in crowd-sourced ADS-B data and a simple correction."
+
+- title: "Chess ratings as a conflict-resolution heuristic"
+  date: "2024-06-20"
+  url: "/research/pdfs/placeholder.pdf"
+  desc: "Half-joking essay on borrowing Elo-style updates for pairwise aircraft prioritization."

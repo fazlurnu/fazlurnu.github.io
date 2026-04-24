@@ -1,0 +1,29 @@
+title: "Muhammad Fazlur Rahman"
+description: "PhD researcher in aerospace technology and autonomous systems (TU Delft). UAS, U-Space, ATM/UTM, conflict detection & resolution, aviation data."
+url: "https://fazlurnu.github.io"
+author:
+  name: "Muhammad Fazlur Rahman"
+
+# Clean post URLs: /blog/my-post/
+permalink: /blog/:slug/
+
+# GitHub-Pages whitelisted plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Posts get the "post" layout automatically
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - .github
+  - vendor

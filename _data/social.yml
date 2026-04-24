@@ -1,0 +1,25 @@
+# Edit ORCID and LinkedIn when you have the real URLs.
+- name: ORCID
+  icon: orcid
+  url: "https://orcid.org/0000-0000-0000-0000"   # TODO: replace
+  handle: "0000-0000-0000-0000"
+
+- name: Google Scholar
+  icon: scholar
+  url: "https://scholar.google.com/citations?hl=en&user=nDi6gp0AAAAJ"
+  handle: "Muhammad Fazlur Rahman"
+
+- name: LinkedIn
+  icon: linkedin
+  url: "https://www.linkedin.com/in/fazlurnu/"    # TODO: confirm
+  handle: "fazlurnu"
+
+- name: GitHub
+  icon: github
+  url: "https://github.com/fazlurnu"
+  handle: "fazlurnu"
+
+- name: Chess.com
+  icon: chess
+  url: "https://www.chess.com/member/toko_material"
+  handle: "toko_material"

@@ -1,0 +1,39 @@
+- title: "Reliability and safety analysis in autonomous UAS separation"
+  authors: "M. F. Rahman, et al."
+  venue: "Journal of Reliability Engineering and System Safety"
+  year: 2025
+  url: "https://www-sciencedirect-com.tudelft.idm.oclc.org/science/article/pii/S0951832025013109"
+  bibtex: |
+    @article{rahman2025reliability,
+      title   = {Reliability and safety analysis in autonomous UAS separation},
+      author  = {Rahman, Muhammad Fazlur and others},
+      journal = {Reliability Engineering and System Safety},
+      year    = {2025},
+      doi     = {10.1016/j.ress.2025.xxxxxx}
+    }
+
+- title: "Modelling ADS-B Reception Probability Using OpenSky Data"
+  authors: "M. F. Rahman, J. Ellerbroek, J. Hoekstra"
+  venue: "Journal of Open Aviation Science"
+  year: 2024
+  url: "https://journals.open.tudelft.nl/joas/article/view/7895"
+  bibtex: |
+    @article{rahman2024adsb,
+      title   = {Modelling ADS-B Reception Probability Using OpenSky Data},
+      author  = {Rahman, Muhammad Fazlur and Ellerbroek, Joost and Hoekstra, Jacco},
+      journal = {Journal of Open Aviation Science},
+      year    = {2024}
+    }
+
+- title: "Autonomous Separation in U-Space: Assessing the Impact of Position Uncertainty"
+  authors: "M. F. Rahman, A. Vlaskin, J. Ellerbroek, J. Hoekstra"
+  venue: "SESAR Innovation Days 2024"
+  year: 2024
+  url: "https://www.sesarju.eu/sites/default/files/documents/sid/2024/papers/SIDs_2024_paper_085%20final.pdf"
+  bibtex: |
+    @inproceedings{rahman2024uspace,
+      title     = {Autonomous Separation in U-Space: Assessing the Impact of Position Uncertainty},
+      author    = {Rahman, Muhammad Fazlur and Vlaskin, Aleksandr and Ellerbroek, Joost and Hoekstra, Jacco},
+      booktitle = {SESAR Innovation Days},
+      year      = {2024}
+    }

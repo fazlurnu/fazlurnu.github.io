@@ -1,0 +1,56 @@
+# kind: talk | paper | workshop | service | milestone
+- date: "Dec 2025"
+  kind: paper
+  text: "Our <a href='https://www-sciencedirect-com.tudelft.idm.oclc.org/science/article/pii/S0951832025013109'>paper</a> is published at Journal of Reliability Engineering and System Safety"
+
+- date: "Dec 2025"
+  kind: award
+  text: "1st place <a href='https://ansperformance.eu/study/data-challenge/dc2025/outcome.html'>Eurocontrol's PRC Challenge 2025</a>, Fuel Burnt Estimation"
+
+- date: "Nov 2025"
+  kind: talk
+  text: "I attended (online) at OpenSky Symposium 2025, Norrköping"
+
+- date: "Oct 2025"
+  kind: paper
+  text: "Our paper got accepted at SESAR Innovation Days 2025"
+
+- date: "Apr 2025"
+  kind: talk
+  text: "I presented at ICNS 2025, Brussels"
+
+- date: "Apr 2025"
+  kind: workshop
+  text: "I attended the <a href='https://mode-s.org/workshop/'>2nd Workshop on Open Science in Aviation</a>, Delft"
+
+- date: "Apr 2025"
+  kind: service
+  text: "Our Certiflight team successfully organized a flight test for <a href='https://certiflight.info/documentation/videos/'>airspace infringement and e-conspicuity</a>"
+
+- date: "Mar 2025"
+  kind: award
+  text: "2nd place <a href='https://wikiengagektn.com/hackathons/s'>Engage 2 Hackathon 2025</a>, Runway Safety"
+
+- date: "Nov 2024"
+  kind: award
+  text: "3rd place <a href='https://ansperformance.eu/study/data-challenge/dc2024/'>Eurocontrol's PRC Challenge 2024</a>, Actual Take-off Weight Estimation"
+
+- date: "Nov 2024"
+  kind: talk
+  text: "I presented at OpenSky Symposium 2024, Hamburg"
+
+- date: "Nov 2024"
+  kind: talk
+  text: "I presented at SESAR Innovation Days 2024, Rome"
+
+- date: "Jul 2024"
+  kind: service
+  text: "I organized the <a href='https://ftmd.itb.ac.id/id/event/bluesky-open-air-traffic-management-simulator-workshop/'>BlueSky Open ATM Simulator Workshop</a> at Institut Teknologi Bandung"
+
+- date: "Jul 2024"
+  kind: talk
+  text: "I presented at ICRAT 2024, Singapore"
+
+- date: "May 2023"
+  kind: milestone
+  text: "Here we go! My PhD journey officially started at TU Delft"

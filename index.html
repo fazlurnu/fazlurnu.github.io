@@ -1,8 +1,104 @@
-<!DOCTYPE html>
-<html>
-<head><title>Fazlur Rahman</title></head>
-<body>
-  <h1>Hello, World!</h1>
-  <p>My website is coming soon.</p>
-</body>
-</html>
+---
+layout: default
+title: About
+---
+
+<header class="wrap">
+  <section id="top" class="hero">
+    <h1>Muhammad Fazlur Rahman</h1>
+
+    <div class="about">
+      <div class="about-text">
+        <p class="note">
+          I am a PhD candidate in Unmanned Traffic Management at TU Delft, the Netherlands 🇳🇱.
+          My research interests include UAS, ATM/UTM, conflict detection and resolution,
+          separation management, and aviation data.
+        </p>
+
+        <p class="note">
+          Previously, I worked at Akkodis 🇫🇷 as a flight control law engineer and at
+          ACSL 🇯🇵 as a drone engineer. I also completed internships at Airbus 🇫🇷 and
+          Indonesian Aerospace 🇮🇩.
+        </p>
+
+        <p class="note">
+          I earned my Master's degree in Aerospace Systems and Control from
+          ISAE-SUPAERO 🇫🇷, and my Bachelor of Science in Aeronautics and Astronautics
+          from Institut Teknologi Bandung 🇮🇩.
+        </p>
+      </div>
+
+      <div class="profile-wrapper">
+        <img src="{{ '/profpic.jpeg' | relative_url }}" alt="Muhammad Fazlur Rahman" />
+      </div>
+    </div>
+  </section>
+</header>
+
+<main class="wrap">
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <h2>Contact</h2>
+    <ul class="contact-list">
+      {% for s in site.data.social %}
+        <li>
+          <a href="{{ s.url }}" target="_blank" rel="noreferrer">
+            {% include icon.html name=s.icon %}
+            <span class="contact-name">{{ s.name }}</span>
+            <span class="contact-handle">{{ s.handle }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- CHESS RATING WIDGET -->
+  <section id="chess">
+    <h2>Chess rating <span class="muted small">· live from chess.com</span></h2>
+    <div class="chess-grid">
+      {% assign modes = "rapid,blitz,bullet" | split: "," %}
+      {% for m in modes %}
+        {% assign data = site.data.chess[m] %}
+        <a class="chess-card" href="https://www.chess.com/stats/{{ m }}/toko_material" target="_blank" rel="noreferrer">
+          {% include icon.html name=m %}
+          <div class="chess-mode">{{ m | capitalize }}</div>
+          <div class="chess-current">{{ data.current | default: "—" }}</div>
+          <div class="chess-best">peak <strong>{{ data.best | default: "—" }}</strong></div>
+        </a>
+      {% endfor %}
+    </div>
+    <p class="muted small">Updated {{ site.data.chess.updated }} · refreshed weekly</p>
+  </section>
+
+  <!-- AWARDS -->
+  <section id="awards">
+    <h2>Awards</h2>
+    <ul class="awards-list">
+      {% for a in site.data.awards %}
+        <li>
+          <span class="date mono">{{ a.year }}</span>
+          <span class="text">
+            {% if a.url %}<a href="{{ a.url }}" target="_blank" rel="noreferrer">{{ a.title }}</a>{% else %}{{ a.title }}{% endif %}
+            {% if a.detail %}<span class="muted">· {{ a.detail }}</span>{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- LANGUAGES -->
+  <section id="languages">
+    <h2>Languages</h2>
+    <ul class="list">
+      <li>Indonesian (native)</li>
+      <li>English (fluent)</li>
+      <li>French (intermediate)</li>
+      <li>Dutch (beginner)</li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <p>© <span class="mono">Muhammad Fazlur Rahman</span> · No template, just vibe coding</p>
+  </footer>
+</main>

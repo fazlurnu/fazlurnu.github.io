@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% if page.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}" />
+  <link rel="stylesheet" href="{{ '/style.css' | relative_url }}" />
+  {% feed_meta %}
+  {% seo %}
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="{{ '/' | relative_url }}" class="brand">Fazlur</a>
+    <div class="links">
+      {% assign nav_path = page.url | split: '/' | compact | first %}
+      <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}class="active"{% endif %}>About</a>
+      <a href="{{ '/research/' | relative_url }}" {% if nav_path == 'research' %}class="active"{% endif %}>Research</a>
+      <a href="{{ '/blog/' | relative_url }}" {% if nav_path == 'blog' %}class="active"{% endif %}>Blog</a>
+    </div>
+  </div>
+</nav>
+
+{{ content }}
+
+<script>
+  // BibTeX toggle + copy
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-bibtex-toggle]');
+    if (t) {
+      const id = t.getAttribute('data-bibtex-toggle');
+      const el = document.getElementById(id);
+      el.hidden = !el.hidden;
+      t.textContent = el.hidden ? 'BibTeX' : 'Hide';
+      return;
+    }
+    const c = e.target.closest('[data-bibtex-copy]');
+    if (c) {
+      const id = c.getAttribute('data-bibtex-copy');
+      const txt = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(txt).then(() => {
+        const prev = c.textContent;
+        c.textContent = 'Copied';
+        setTimeout(() => (c.textContent = prev), 1400);
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
