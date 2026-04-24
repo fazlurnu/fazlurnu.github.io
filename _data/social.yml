@@ -1,7 +1,7 @@
 # Edit ORCID and LinkedIn when you have the real URLs.
 - name: ORCID
   icon: orcid
-  url: "https://orcid.org/0000-0000-0000-0000"   # TODO: replace
+  url: "https://orcid.org/0009-0006-8410-7156"
   handle: "0000-0000-0000-0000"
 
 - name: Google Scholar
@@ -11,7 +11,7 @@
 
 - name: LinkedIn
   icon: linkedin
-  url: "https://www.linkedin.com/in/fazlurnu/"    # TODO: confirm
+  url: "https://www.linkedin.com/in/muhammad-fazlur-rahman-572092125/"
   handle: "fazlurnu"
 
 - name: GitHub

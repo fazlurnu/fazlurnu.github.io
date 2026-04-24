@@ -12,6 +12,11 @@
       note   = {Personal note}
     }
 
+- title: "The Best Initial Guess for Wordle"
+  date: "2022-01-10"
+  url: "https://fazlurnucom.wordpress.com/2022/01/10/whats-the-best-initial-guess-for-wordle/"
+  desc: "Back when Wordle had its own website, this was the best initial guess!"
+
 - title: "Magnetometer calibration using Levenberg-Marquardt algorithm"
   date: "2021-09-01"
   url: "/research/pdfs/sphere_fit_levenberg_marquardt.pdf"

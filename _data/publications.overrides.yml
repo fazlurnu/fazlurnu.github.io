@@ -1,0 +1,28 @@
+# Per-DOI overrides for the auto-generated publications list.
+#
+# Consumed by scripts/fetch_publications.py.
+# Any field set here wins over whatever Crossref returned.
+# Match is case-insensitive on DOI.
+#
+# Typical reasons to override:
+#   - Crossref venue is ugly or abbreviated
+#   - Author list is wrong / truncated
+#   - You want a specific URL (e.g. open-access PDF, TU Delft repo)
+#   - Crossref has no BibTeX and you want to pin one
+#   - Add a publication that isn't on ORCID yet (must include title + year)
+#
+# Example:
+#
+# - doi: "10.1016/j.ress.2025.xxxxxx"
+#   authors: "M. F. Rahman, J. Ellerbroek, J. Hoekstra"
+#   venue: "Reliability Engineering & System Safety"
+#   url: "https://www.sciencedirect.com/science/article/pii/S0951832025013109"
+#   bibtex: |
+#     @article{rahman2025reliability,
+#       title   = {Reliability and safety analysis in autonomous UAS separation},
+#       author  = {Rahman, Muhammad Fazlur and Ellerbroek, Joost and Hoekstra, Jacco},
+#       journal = {Reliability Engineering and System Safety},
+#       year    = {2025}
+#     }
+
+[]
