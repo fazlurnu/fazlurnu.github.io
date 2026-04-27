@@ -27,3 +27,6 @@ exclude:
   - Gemfile.lock
   - .github
   - vendor
+  - notebooks
+  - Dockerfile
+  - docker-compose.yml

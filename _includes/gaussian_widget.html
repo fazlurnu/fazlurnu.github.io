@@ -1,0 +1,163 @@
+<div class="py-widget">
+  <div class="py-widget-header">
+    <span class="py-widget-lang">Python · Interactive</span>
+    <span class="py-widget-status" id="pywidget-status">Loading runtime…</span>
+  </div>
+
+  <div class="py-widget-controls">
+    <div class="py-slider-row">
+      <label for="mean-slider">Mean (μ)</label>
+      <input type="range" id="mean-slider" min="-5" max="5" step="0.1" value="0" disabled>
+      <output id="mean-val">0.0</output>
+    </div>
+    <div class="py-slider-row">
+      <label for="std-slider">Std Dev (σ)</label>
+      <input type="range" id="std-slider" min="0.1" max="3.0" step="0.1" value="1.0" disabled>
+      <output id="std-val">1.0</output>
+    </div>
+  </div>
+
+  <div class="py-widget-plot">
+    <div id="pywidget-loading-msg">
+      <div class="py-spinner"></div>
+      <span>Loading Python (~10 s on first visit, cached after)</span>
+    </div>
+    <img id="gaussian-img" alt="Gaussian distribution plot" style="display:none;width:100%;border-radius:8px;">
+  </div>
+</div>
+
+<style>
+.py-widget {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.py-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-widget-lang { color: var(--accent); font-weight: 600; }
+.py-widget-status { color: var(--muted); }
+.py-widget-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.py-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-slider-row label { width: 88px; color: var(--text); }
+.py-slider-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.py-slider-row output { width: 34px; text-align: right; color: var(--muted); }
+.py-widget-plot {
+  padding: 16px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#pywidget-loading-msg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.py-spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: py-spin 0.75s linear infinite;
+}
+@keyframes py-spin { to { transform: rotate(360deg); } }
+</style>
+
+<script type="module">
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.mjs";
+
+const statusEl  = document.getElementById("pywidget-status");
+const loadingEl = document.getElementById("pywidget-loading-msg");
+const imgEl     = document.getElementById("gaussian-img");
+const meanSlider = document.getElementById("mean-slider");
+const stdSlider  = document.getElementById("std-slider");
+const meanOut    = document.getElementById("mean-val");
+const stdOut     = document.getElementById("std-val");
+
+const pyodide = await loadPyodide();
+await pyodide.loadPackage(["numpy", "matplotlib"]);
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np, io, base64
+
+def render(mean, std):
+    x = np.linspace(-17.5, 17.5, 500)
+    y = np.exp(-0.5 * ((x - mean) / std)**2)
+
+    fig, ax = plt.subplots(figsize=(7, 3.2))
+    ax.plot(x, y, color="#1a73e8", linewidth=2.5)
+    ax.fill_between(x, y, alpha=0.12, color="#1a73e8")
+    ax.axvline(mean, color="tomato", linestyle="--", linewidth=1.5, label=f"μ = {mean:.1f}")
+    ax.axvline(mean - std, color="#aaa", linestyle=":", linewidth=1.0)
+    ax.axvline(mean + std, color="#aaa", linestyle=":", linewidth=1.0, label=f"σ = {std:.1f}")
+    ax.set_xlim(-17.5, 17.5)
+    ax.set_ylim(0, 1.1)
+    ax.set_xlabel("x", fontsize=11)
+    ax.set_ylabel("Normalized density", fontsize=11)
+    ax.set_title(f"N(μ={mean:.1f}, σ={std:.1f})", fontsize=12)
+    ax.legend(fontsize=10)
+    fig.patch.set_facecolor("white")
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode()
+`);
+
+statusEl.textContent = "Ready";
+meanSlider.disabled = false;
+stdSlider.disabled  = false;
+loadingEl.style.display = "none";
+imgEl.style.display = "block";
+
+async function update() {
+  const mean = parseFloat(meanSlider.value);
+  const std  = parseFloat(stdSlider.value);
+  const b64  = await pyodide.runPythonAsync(`render(${mean}, ${std})`);
+  imgEl.src  = "data:image/png;base64," + b64;
+}
+
+await update();
+
+let timer;
+function onInput() {
+  meanOut.value = parseFloat(meanSlider.value).toFixed(1);
+  stdOut.value  = parseFloat(stdSlider.value).toFixed(1);
+  clearTimeout(timer);
+  timer = setTimeout(update, 130);
+}
+
+meanSlider.addEventListener("input", onInput);
+stdSlider.addEventListener("input", onInput);
+</script>

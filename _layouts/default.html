@@ -20,6 +20,7 @@
         <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}class="active"{% endif %}>About</a>
         <a href="{{ '/research/' | relative_url }}" {% if nav_path == 'research' %}class="active"{% endif %}>Research</a>
         <a href="{{ '/blog/' | relative_url }}" {% if nav_path == 'blog' %}class="active"{% endif %}>Blog</a>
+        <a href="/lab" target="_blank" rel="noreferrer">Lab ↗</a>
       </div>
       <div class="social">
         {% for s in site.data.social %}
