@@ -1,0 +1,62 @@
+<script>
+MathJax = {
+  tex: {
+    inlineMath:  [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    macros: {
+      // Generic bold vector
+      vect:      ['\\mathbf{#1}', 1],
+
+      // State variables
+      xrel:      '\\vect{x}_{\\mathrm{rel}}',
+      Vrel:      '\\vect{V}_{\\mathrm{rel}}',
+      dCPA:      '\\vect{d}_{\\mathrm{CPA}}',
+      vperp:     '\\vect{v}_{\\perp}',
+      dCPAp:     '\\mathbf{d}_{\\mathrm{CPA,p}}',
+      dCPAv:     '\\mathbf{d}_{\\mathrm{CPA,v}}',
+      dV:        '\\mathbf{dV}',
+      Vo:        '\\vect{V}_o',
+      Vi:        '\\vect{V}_i',
+      Vres:      '\\vect{V}_{\\mathrm{res}}',
+
+      // Positions
+      xown:      '\\vect{x}_o',
+      xint:      '\\vect{x}_i',
+
+      // Means & covariances
+      muo:       '\\boldsymbol{\\mu}_o',
+      mui:       '\\boldsymbol{\\mu}_i',
+      Sigmao:    '\\Sigma_o',
+      Sigmai:    '\\Sigma_i',
+      nuo:       '\\boldsymbol{\\nu}_o',
+      nui:       '\\boldsymbol{\\nu}_i',
+      SigmaVo:   '\\Sigma_{v_o}',
+      SigmaVi:   '\\Sigma_{v_i}',
+
+      // Scalars
+      norm:      ['\\lVert #1 \\rVert', 1],
+      inner:     ['#1^{\\top} #2', 2],
+
+      // Time variables
+      tCPA:      't_{\\mathrm{CPA}}',
+      tCPAp:     't_{\\mathrm{CPA},p}',
+      tCPAv:     't_{\\mathrm{CPA},v}',
+      tin:       't_{\\mathrm{in}}',
+      tlook:     't_{\\mathrm{lookahead}}',
+
+      // Parameters
+      RPZ:       'R_{\\mathrm{PZ}}',
+
+      // Relative uncertainty
+      murel:     '\\boldsymbol{\\mu}_{\\mathrm{rel}}',
+      Sigmarel:  '\\Sigma_{\\mathrm{rel}}',
+      nurel:     '\\boldsymbol{\\nu}_{\\mathrm{rel}}',
+      SigmaVrel: '\\Sigma_{V_{\\mathrm{rel}}}',
+
+      // Distributions
+      Normal:    '\\mathcal{N}'
+    }
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
