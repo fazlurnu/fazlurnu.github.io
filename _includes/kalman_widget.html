@@ -1,0 +1,148 @@
+<div class="py-widget">
+  <div class="py-widget-header">
+    <span class="py-widget-lang">Python · Interactive</span>
+    <span class="py-widget-status" id="kw-status">Loading runtime…</span>
+  </div>
+
+  <div class="py-widget-controls">
+    <div class="kw-group-label">Measurement (A · sensor)</div>
+    <div class="py-slider-row">
+      <label for="kw-mu-a">Mean (μ<sub>A</sub>)</label>
+      <input type="range" id="kw-mu-a" min="-10" max="10" step="0.5" value="5" disabled>
+      <output id="kw-mu-a-val">5.0</output>
+    </div>
+    <div class="py-slider-row">
+      <label for="kw-sig-a">Std (σ<sub>A</sub>)</label>
+      <input type="range" id="kw-sig-a" min="0.3" max="5" step="0.1" value="2.0" disabled>
+      <output id="kw-sig-a-val">2.0</output>
+    </div>
+
+    <div class="kw-group-label" style="margin-top:6px;">Physics model (B · prior)</div>
+    <div class="py-slider-row">
+      <label for="kw-mu-b">Mean (μ<sub>B</sub>)</label>
+      <input type="range" id="kw-mu-b" min="-10" max="10" step="0.5" value="-3" disabled>
+      <output id="kw-mu-b-val">-3.0</output>
+    </div>
+    <div class="py-slider-row">
+      <label for="kw-sig-b">Std (σ<sub>B</sub>)</label>
+      <input type="range" id="kw-sig-b" min="0.3" max="5" step="0.1" value="1.5" disabled>
+      <output id="kw-sig-b-val">1.5</output>
+    </div>
+  </div>
+
+  <div class="py-widget-plot">
+    <div id="kw-loading-msg">
+      <div class="py-spinner"></div>
+      <span>Loading Python (~10 s on first visit, cached after)</span>
+    </div>
+    <img id="kw-img" alt="Kalman filter plot" style="display:none;width:100%;border-radius:8px;">
+  </div>
+</div>
+
+<style>
+.kw-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--line);
+}
+</style>
+
+<script type="module">
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.mjs";
+
+const statusEl  = document.getElementById("kw-status");
+const loadingEl = document.getElementById("kw-loading-msg");
+const imgEl     = document.getElementById("kw-img");
+
+const sliders = {
+  muA:  document.getElementById("kw-mu-a"),
+  sigA: document.getElementById("kw-sig-a"),
+  muB:  document.getElementById("kw-mu-b"),
+  sigB: document.getElementById("kw-sig-b"),
+};
+const outputs = {
+  muA:  document.getElementById("kw-mu-a-val"),
+  sigA: document.getElementById("kw-sig-a-val"),
+  muB:  document.getElementById("kw-mu-b-val"),
+  sigB: document.getElementById("kw-sig-b-val"),
+};
+
+const pyodide = await loadPyodide();
+await pyodide.loadPackage(["numpy", "matplotlib"]);
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np, io, base64
+
+def render(mu_a, sig_a, mu_b, sig_b):
+    x = np.linspace(-17.5, 17.5, 600)
+
+    y_a = np.exp(-0.5 * ((x - mu_a) / sig_a)**2)
+    y_b = np.exp(-0.5 * ((x - mu_b) / sig_b)**2)
+
+    # 1D Kalman update (product of two Gaussians)
+    var_est = (sig_a**2 * sig_b**2) / (sig_a**2 + sig_b**2)
+    mu_est  = (mu_a * sig_b**2 + mu_b * sig_a**2) / (sig_a**2 + sig_b**2)
+    sig_est = np.sqrt(var_est)
+    y_est   = np.exp(-0.5 * ((x - mu_est) / sig_est)**2)
+
+    fig, ax = plt.subplots(figsize=(7, 3.5))
+
+    ax.plot(x, y_a, color="tomato",   linewidth=2.0, label=f"Measurement A  (μ={mu_a:.1f}, σ={sig_a:.1f})")
+    ax.fill_between(x, y_a, alpha=0.10, color="tomato")
+
+    ax.plot(x, y_b, color="#1a73e8", linewidth=2.0, label=f"Physics model B  (μ={mu_b:.1f}, σ={sig_b:.1f})")
+    ax.fill_between(x, y_b, alpha=0.10, color="#1a73e8")
+
+    ax.plot(x, y_est, color="#34a853", linewidth=2.5, label=f"Estimated state  (μ={mu_est:.2f}, σ={sig_est:.2f})")
+    ax.fill_between(x, y_est, alpha=0.15, color="#34a853")
+
+    ax.set_xlim(-17.5, 17.5)
+    ax.set_ylim(0, 1.1)
+    ax.set_xlabel("Position", fontsize=11)
+    ax.set_ylabel("Normalized density", fontsize=11)
+    ax.set_title("1D Kalman Filter Update", fontsize=12)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=3, fontsize=9, frameon=True, framealpha=0.9)
+    fig.patch.set_facecolor("white")
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.22)
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode()
+`);
+
+statusEl.textContent = "Ready";
+Object.values(sliders).forEach(s => s.disabled = false);
+loadingEl.style.display = "none";
+imgEl.style.display = "block";
+
+async function update() {
+  const b64 = await pyodide.runPythonAsync(
+    `render(${sliders.muA.value}, ${sliders.sigA.value}, ${sliders.muB.value}, ${sliders.sigB.value})`
+  );
+  imgEl.src = "data:image/png;base64," + b64;
+}
+
+await update();
+
+let timer;
+function onInput(key, el) {
+  outputs[key].value = parseFloat(el.value).toFixed(1);
+  clearTimeout(timer);
+  timer = setTimeout(update, 130);
+}
+
+sliders.muA.addEventListener("input",  () => onInput("muA",  sliders.muA));
+sliders.sigA.addEventListener("input", () => onInput("sigA", sliders.sigA));
+sliders.muB.addEventListener("input",  () => onInput("muB",  sliders.muB));
+sliders.sigB.addEventListener("input", () => onInput("sigB", sliders.sigB));
+</script>

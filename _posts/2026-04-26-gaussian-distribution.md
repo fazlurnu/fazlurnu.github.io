@@ -1,6 +1,6 @@
 ---
 title: "Showing The Gaussian Distribution, Interactively"
-date: 2026-04-27
+date: 2026-04-26
 tags: [math, probability]
 excerpt: "A short visual intro to the normal distribution — with a live interactive widget you can play with."
 ---
