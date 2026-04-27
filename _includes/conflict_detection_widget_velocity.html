@@ -1,0 +1,410 @@
+<div class="py-widget">
+  <div class="py-widget-header">
+    <span class="py-widget-lang">Python · Interactive</span>
+    <span class="py-widget-status" id="cdv-status">Loading runtime…</span>
+  </div>
+
+  <div class="py-widget-controls">
+    <div class="cd-slider-label">Intruder</div>
+    <div class="py-slider-row">
+      <label for="cdv-speed">Speed (kts)</label>
+      <input type="range" id="cdv-speed" min="50" max="150" step="5" value="90" disabled>
+      <output id="cdv-speed-val">90</output>
+    </div>
+    <div class="py-slider-row">
+      <label for="cdv-hdg">Heading (°)</label>
+      <input type="range" id="cdv-hdg" min="0" max="355" step="5" value="315" disabled>
+      <output id="cdv-hdg-val">315</output>
+    </div>
+    <div class="cd-slider-label" style="margin-top:6px;">Velocity noise</div>
+    <div class="py-slider-row">
+      <label for="cdv-sigv">&#963;&#8348; (kts)</label>
+      <input type="range" id="cdv-sigv" min="1" max="20" step="1" value="5" disabled>
+      <output id="cdv-sigv-val">5</output>
+    </div>
+  </div>
+
+  <div class="py-btn-row">
+    <button class="py-widget-btn" id="cdv-add1"    disabled>Add 1 Sample</button>
+    <button class="py-widget-btn" id="cdv-add10"   disabled>Add 10 Samples</button>
+    <button class="py-widget-btn" id="cdv-add100"  disabled>Add 100 Samples</button>
+    <button class="py-widget-btn" id="cdv-add1000" disabled>Add 1000 Samples</button>
+    <button class="py-widget-btn py-widget-btn-danger" id="cdv-reset" disabled>Reset</button>
+    <span class="cd-count" id="cdv-count">0 samples</span>
+  </div>
+
+  <div class="py-widget-plot" style="flex-direction:column;align-items:stretch;">
+    <pre id="cdv-error" style="display:none;margin:0 0 12px;padding:10px 12px;background:#fff3f3;border:1px solid tomato;border-radius:6px;font-size:11px;color:#c00;white-space:pre-wrap;overflow-x:auto;"></pre>
+    <div id="cdv-loading">
+      <div class="py-spinner"></div>
+      <span>Loading Python (~10 s on first visit, cached after)</span>
+    </div>
+    <img id="cdv-img" alt="Velocity uncertainty plot" style="display:none;width:100%;border-radius:8px;">
+  </div>
+</div>
+
+<style>
+/* ── Only emit base styles if the position widget hasn't already loaded them ── */
+.py-widget          { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin: 2rem 0; }
+.py-widget-header   { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: var(--accent-soft); border-bottom: 1px solid var(--line); font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.py-widget-lang     { color: var(--accent); font-weight: 600; }
+.py-widget-status   { color: var(--muted); }
+.py-widget-controls { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.cd-slider-label    { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.py-slider-row      { display: flex; align-items: center; gap: 12px; font-size: 13px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.py-slider-row label { width: 100px; color: var(--text); }
+.py-slider-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.py-slider-row output { width: 34px; text-align: right; color: var(--muted); }
+.py-btn-row         { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.py-widget-btn      { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 6px; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; transition: background 0.15s, color 0.15s; line-height: 1.4; }
+.py-widget-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.py-widget-btn:disabled             { border-color: var(--line); color: var(--muted); cursor: not-allowed; }
+.py-widget-btn-danger               { border-color: tomato; color: tomato; }
+.py-widget-btn-danger:hover:not(:disabled) { background: tomato; color: #fff; }
+.py-widget-btn-danger:disabled      { border-color: var(--line); color: var(--muted); }
+.cd-count           { margin-left: auto; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted); }
+.py-widget-plot     { padding: 16px; min-height: 72px; display: flex; align-items: center; justify-content: center; }
+#cdv-loading        { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+.py-spinner         { flex-shrink: 0; width: 16px; height: 16px; border: 2px solid var(--line-strong); border-top-color: var(--accent); border-radius: 50%; animation: py-spin 0.75s linear infinite; }
+@keyframes py-spin  { to { transform: rotate(360deg); } }
+</style>
+
+<script type="module">
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.mjs";
+
+const statusEl  = document.getElementById("cdv-status");
+const loadingEl = document.getElementById("cdv-loading");
+const imgEl     = document.getElementById("cdv-img");
+const countEl   = document.getElementById("cdv-count");
+const errorEl   = document.getElementById("cdv-error");
+
+const btn1    = document.getElementById("cdv-add1");
+const btn10   = document.getElementById("cdv-add10");
+const btn100  = document.getElementById("cdv-add100");
+const btn1000 = document.getElementById("cdv-add1000");
+const btnReset = document.getElementById("cdv-reset");
+
+const speedSlider = document.getElementById("cdv-speed");
+const hdgSlider   = document.getElementById("cdv-hdg");
+const sigvSlider  = document.getElementById("cdv-sigv");
+const speedOut    = document.getElementById("cdv-speed-val");
+const hdgOut      = document.getElementById("cdv-hdg-val");
+const sigvOut     = document.getElementById("cdv-sigv-val");
+
+const allBtns    = [btn1, btn10, btn100, btn1000, btnReset];
+const allControls = [...allBtns, speedSlider, hdgSlider, sigvSlider];
+
+const pyodide = await loadPyodide();
+await pyodide.loadPackage(["numpy", "matplotlib"]);
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np, io, base64, math
+
+# ── Fixed parameters ──────────────────────────────────────────────────────────
+V_OWN_V     = np.array([0.0, 100.0])   # ownship: 100 kts north (fixed)
+X_REL_V     = np.array([35.0, 18.0])   # fixed relative position (NM)
+ARROW_SCALE_V = 0.12                    # NM per kt for arrows
+MAX_TRAJ    = 30                        # max sample trajectories in geometry plot
+
+# ── Mutable scenario (sliders) ────────────────────────────────────────────────
+V_INT_MEAN_V  = None
+V_REL_MEAN_V  = None
+SIGMA_V_V     = 5.0
+T_CPA_MEAN_V  = None
+DCPA_MEAN_V   = None
+DCPA_MAG_V    = None
+
+GEO_XLIM_V  = GEO_YLIM_V  = None
+VREL_XLIM_V = VREL_YLIM_V = None
+DCPA_XLIM_V = DCPA_YLIM_V = None
+HIST_XLIM_V = None
+HIST_YLIM_V = (0.0, 0.5)
+
+def update_scenario_v(speed_kts, heading_deg, sigma_v=None):
+    global V_INT_MEAN_V, V_REL_MEAN_V, T_CPA_MEAN_V, DCPA_MEAN_V, DCPA_MAG_V, SIGMA_V_V
+    if sigma_v is not None:
+        SIGMA_V_V = float(sigma_v)
+    hdg = math.radians(float(heading_deg))
+    V_INT_MEAN_V = np.array([float(speed_kts)*math.sin(hdg),
+                              float(speed_kts)*math.cos(hdg)])
+    V_REL_MEAN_V = V_OWN_V - V_INT_MEAN_V
+    dv2 = float(np.dot(V_REL_MEAN_V, V_REL_MEAN_V))
+    T_CPA_MEAN_V = float(np.dot(V_REL_MEAN_V, X_REL_V)) / dv2 if dv2 > 1e-9 else 0.0
+    DCPA_MEAN_V  = X_REL_V - V_REL_MEAN_V * T_CPA_MEAN_V
+    DCPA_MAG_V   = float(np.linalg.norm(DCPA_MEAN_V))
+    _recompute_limits_v()
+
+def _recompute_limits_v():
+    global GEO_XLIM_V, GEO_YLIM_V, VREL_XLIM_V, VREL_YLIM_V
+    global DCPA_XLIM_V, DCPA_YLIM_V, HIST_XLIM_V
+
+    _traj_end = X_REL_V - V_REL_MEAN_V * max(T_CPA_MEAN_V * 1.5, 0.01)
+    _cpa_foot = V_REL_MEAN_V * T_CPA_MEAN_V
+    _geo_pts  = np.vstack([
+        [0, 0], X_REL_V, _traj_end, _cpa_foot,
+        V_OWN_V * ARROW_SCALE_V, -V_INT_MEAN_V * ARROW_SCALE_V,
+        X_REL_V + V_INT_MEAN_V * ARROW_SCALE_V,
+    ])
+    _geo_cx   = (_geo_pts[:,0].min() + _geo_pts[:,0].max()) / 2
+    _geo_cy   = (_geo_pts[:,1].min() + _geo_pts[:,1].max()) / 2
+    _geo_half = max(
+        _geo_pts[:,0].max()-_geo_cx, _geo_cx-_geo_pts[:,0].min(),
+        _geo_pts[:,1].max()-_geo_cy, _geo_cy-_geo_pts[:,1].min()
+    ) + 7.0
+    GEO_XLIM_V = (_geo_cx - _geo_half, _geo_cx + _geo_half)
+    GEO_YLIM_V = (_geo_cy - _geo_half, _geo_cy + _geo_half)
+
+    _vr_half   = 4.0 * SIGMA_V_V + 2.0
+    VREL_XLIM_V = (V_REL_MEAN_V[0] - _vr_half, V_REL_MEAN_V[0] + _vr_half)
+    VREL_YLIM_V = (V_REL_MEAN_V[1] - _vr_half, V_REL_MEAN_V[1] + _vr_half)
+
+    _tc       = max(T_CPA_MEAN_V, 0.01)
+    _dc_half  = SIGMA_V_V * _tc * 4.5 + 3.0
+    DCPA_XLIM_V = (float(DCPA_MEAN_V[0]) - _dc_half, float(DCPA_MEAN_V[0]) + _dc_half)
+    DCPA_YLIM_V = (float(DCPA_MEAN_V[1]) - _dc_half, float(DCPA_MEAN_V[1]) + _dc_half)
+
+    HIST_XLIM_V = (0.0, max(DCPA_MAG_V + SIGMA_V_V * _tc * 5.0, 2.0))
+
+update_scenario_v(90.0, 315.0, 5.0)
+
+# ── Sample storage ────────────────────────────────────────────────────────────
+vrel_samples_v = []
+dcpa_samples_v = []
+dcpa_mags_v    = []
+
+def add_samples_v(n=1):
+    draws = np.random.multivariate_normal(V_REL_MEAN_V, SIGMA_V_V**2 * np.eye(2), int(n))
+    for vr in draws:
+        dv2 = float(np.dot(vr, vr))
+        t   = float(np.dot(vr, X_REL_V)) / dv2 if dv2 > 1e-9 else 0.0
+        dc  = X_REL_V - vr * t
+        vrel_samples_v.append(vr.tolist())
+        dcpa_samples_v.append(dc.tolist())
+        dcpa_mags_v.append(float(np.linalg.norm(dc)))
+
+def reset_samples_v():
+    vrel_samples_v.clear()
+    dcpa_samples_v.clear()
+    dcpa_mags_v.clear()
+
+# ── Render ────────────────────────────────────────────────────────────────────
+def render_v():
+    import traceback as _tb
+    try:
+        return _render_inner_v()
+    except Exception:
+        return "ERR:" + _tb.format_exc()
+
+def _render_inner_v():
+    C1, C2, C3, C4 = "#1a73e8", "tomato", "#34a853", "#f9a825"
+    CGRAY = "#888888"
+
+    vrels = np.array(vrel_samples_v) if vrel_samples_v else None
+    ds    = np.array(dcpa_samples_v) if dcpa_samples_v else None
+    ms    = np.array(dcpa_mags_v)    if dcpa_mags_v    else None
+    n     = len(vrel_samples_v)
+
+    fig, axes = plt.subplots(2, 2, figsize=(11, 9))
+    fig.patch.set_facecolor("white")
+
+    # ── (0,0) Conflict geometry ───────────────────────────────────────────────
+    ax     = axes[0, 0]
+    vr_hat = V_REL_MEAN_V / (np.linalg.norm(V_REL_MEAN_V) + 1e-9)
+    cpa_foot = V_REL_MEAN_V * T_CPA_MEAN_V
+
+    # Sample V_rel lines from ownship (origin) — fan shows spread of V_rel directions
+    if vrels is not None:
+        for vr in vrels[:MAX_TRAJ]:
+            dv2 = float(np.dot(vr, vr))
+            t_s = float(np.dot(vr, X_REL_V)) / dv2 if dv2 > 1e-9 else 0.0
+            t_d = max(t_s * 1.15, 0.05)
+            ax.plot([0, vr[0]*t_d], [0, vr[1]*t_d],
+                    "-", color=C4, lw=0.6, alpha=0.28, zorder=2)
+
+    # Extended V_rel line from ownship (dashed green) — same convention as position widget
+    t_end = max(T_CPA_MEAN_V * 1.5, 0.05)
+    ax.plot([0, V_REL_MEAN_V[0]*t_end], [0, V_REL_MEAN_V[1]*t_end],
+            "--", color=C3, lw=1.3, alpha=0.6, zorder=3)
+
+    # x_rel: origin → intruder (dashed gray)
+    ax.plot([0, X_REL_V[0]], [0, X_REL_V[1]],
+            "--", color=CGRAY, lw=1.1, alpha=0.55, zorder=2)
+    _mid = X_REL_V * 0.45
+    ax.text(_mid[0]-1.5, _mid[1]+1.0, "x_rel", color=CGRAY, fontsize=8.5)
+
+    # Mean dCPA perpendicular: cpa_foot → X_REL_V
+    ax.plot([cpa_foot[0], X_REL_V[0]], [cpa_foot[1], X_REL_V[1]],
+            "-", color=C3, lw=2.0, zorder=4,
+            label=f"d_CPA (mean) = {DCPA_MAG_V:.2f} NM")
+    ax.scatter(*cpa_foot, color=C3, s=55, zorder=5)
+    _dn = float(np.linalg.norm(DCPA_MEAN_V))
+    if _dn > 1e-6:
+        _dd = DCPA_MEAN_V / _dn
+        _sq = (GEO_XLIM_V[1] - GEO_XLIM_V[0]) * 0.024
+        _p1, _p2 = cpa_foot + _sq*_dd, cpa_foot + _sq*vr_hat
+        ax.plot([_p1[0], _p1[0]+_sq*vr_hat[0], _p2[0]],
+                [_p1[1], _p1[1]+_sq*vr_hat[1], _p2[1]],
+                "-", color=C3, lw=0.9, zorder=5)
+
+    # Velocity arrows at ownship
+    vow = V_OWN_V * ARROW_SCALE_V
+    ax.annotate("", xy=vow, xytext=(0,0),
+                arrowprops=dict(arrowstyle="-|>", color=C1, lw=1.8, mutation_scale=14))
+    ax.text(vow[0]+0.6, vow[1]-0.5, "Vo", color=C1, fontsize=9, fontweight="bold")
+
+    nvi = -V_INT_MEAN_V * ARROW_SCALE_V
+    ax.annotate("", xy=nvi, xytext=(0,0),
+                arrowprops=dict(arrowstyle="-|>", color=CGRAY, lw=1.4, mutation_scale=12))
+    ax.text(nvi[0]+0.4, nvi[1]-0.8, "-Vi", color=CGRAY, fontsize=9)
+
+    vrl = V_REL_MEAN_V * ARROW_SCALE_V
+    ax.annotate("", xy=vrl, xytext=(0,0),
+                arrowprops=dict(arrowstyle="-|>", color=C3, lw=2.0, mutation_scale=14))
+    ax.text(vrl[0]+0.5, vrl[1]-0.8, "Vrel", color=C3, fontsize=9, fontweight="bold")
+
+    ax.scatter(0, 0, color=C1, s=120, zorder=7, label="Ownship")
+
+    vi  = V_INT_MEAN_V * ARROW_SCALE_V
+    vit = X_REL_V + vi
+    ax.annotate("", xy=vit, xytext=X_REL_V,
+                arrowprops=dict(arrowstyle="-|>", color=C2, lw=1.8, mutation_scale=14))
+    ax.text(vit[0]-0.5, vit[1]+0.5, "Vi", color=C2, fontsize=9, fontweight="bold")
+    ax.scatter(*X_REL_V, color=C2, s=120, marker="^", zorder=7, label="Intruder (fixed)")
+
+    ax.set_xlim(*GEO_XLIM_V); ax.set_ylim(*GEO_YLIM_V)
+    ax.set_xlabel("x (NM)", fontsize=10); ax.set_ylabel("y (NM)", fontsize=10)
+    ax.set_title("Conflict geometry", fontsize=11, fontweight="bold")
+    ax.legend(fontsize=9, loc="upper right")
+    ax.set_aspect("equal"); ax.grid(True, alpha=0.25)
+
+    # ── (0,1) V_rel samples ───────────────────────────────────────────────────
+    ax = axes[0, 1]
+    if vrels is not None:
+        ax.scatter(vrels[:,0], vrels[:,1], color=C4, s=28, alpha=0.65, zorder=3,
+                   label=f"V_rel samples (n={n})")
+        th = np.linspace(0, 2*np.pi, 200)
+        ax.plot(V_REL_MEAN_V[0] + SIGMA_V_V*np.cos(th),
+                V_REL_MEAN_V[1] + SIGMA_V_V*np.sin(th),
+                "--", color=C2, lw=1.1, alpha=0.55, label="1-\u03c3 bound")
+    ax.scatter(*V_REL_MEAN_V, color=C2, s=120, marker="*", zorder=6, label="Mean V_rel")
+    ax.set_xlim(*VREL_XLIM_V); ax.set_ylim(*VREL_YLIM_V)
+    ax.set_xlabel("V_rel,x (kts)", fontsize=10); ax.set_ylabel("V_rel,y (kts)", fontsize=10)
+    ax.set_title("Relative velocity samples", fontsize=11, fontweight="bold")
+    ax.legend(fontsize=9); ax.set_aspect("equal"); ax.grid(True, alpha=0.25)
+
+    # ── (1,0) d_CPA vector ────────────────────────────────────────────────────
+    ax = axes[1, 0]
+    if ds is not None:
+        ax.scatter(ds[:,0], ds[:,1], color=C4, s=28, alpha=0.65, zorder=3,
+                   label="d_CPA samples")
+    ax.scatter(*DCPA_MEAN_V, color=C3, s=120, marker="*", zorder=6,
+               label=f"Mean d_CPA ({DCPA_MEAN_V[0]:.1f}, {DCPA_MEAN_V[1]:.1f}) NM")
+    ax.axhline(0, color="gray", lw=0.6, alpha=0.4)
+    ax.axvline(0, color="gray", lw=0.6, alpha=0.4)
+    ax.set_xlim(*DCPA_XLIM_V); ax.set_ylim(*DCPA_YLIM_V)
+    ax.set_xlabel("d_CPA,x (NM)", fontsize=10); ax.set_ylabel("d_CPA,y (NM)", fontsize=10)
+    ax.set_title("d_CPA vector (non-Gaussian)", fontsize=11, fontweight="bold")
+    ax.legend(fontsize=9); ax.set_aspect("equal"); ax.grid(True, alpha=0.25)
+
+    # ── (1,1) Histogram of |d_CPA| ───────────────────────────────────────────
+    ax = axes[1, 1]
+    if ms is not None and len(ms) >= 2:
+        ax.hist(ms, bins="auto", color=C4, alpha=0.72, edgecolor="white",
+                density=True, label="|d_CPA| samples")
+    ax.axvline(DCPA_MAG_V, color=C3, linestyle="--", lw=2.0,
+               label=f"Mean |d_CPA| = {DCPA_MAG_V:.2f} NM")
+    ax.set_xlim(*HIST_XLIM_V); ax.set_ylim(*HIST_YLIM_V)
+    ax.set_xlabel("|d_CPA| (NM)", fontsize=10); ax.set_ylabel("Density", fontsize=10)
+    ax.set_title("Distribution of |d_CPA|", fontsize=11, fontweight="bold")
+    ax.legend(fontsize=9); ax.grid(True, alpha=0.25)
+
+    plt.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode()
+`);
+
+statusEl.textContent = "Ready";
+loadingEl.style.display = "none";
+imgEl.style.display = "block";
+allControls.forEach(el => el.disabled = false);
+
+function lock()   { allControls.forEach(el => el.disabled = true);  }
+function unlock() { allControls.forEach(el => el.disabled = false); }
+
+async function refresh() {
+  imgEl.style.opacity = "0.5";
+  try {
+    const result = await pyodide.runPythonAsync("render_v()");
+    if (result.startsWith("ERR:")) {
+      statusEl.textContent = "Python error";
+      errorEl.textContent  = result.slice(4);
+      errorEl.style.display = "block";
+      console.error("[cdv-widget]", result.slice(4));
+    } else {
+      errorEl.style.display = "none";
+      imgEl.src = "data:image/png;base64," + result;
+      statusEl.textContent = "Ready";
+    }
+  } catch (e) {
+    statusEl.textContent = "JS error: " + e.message;
+    console.error("[cdv-widget]", e);
+  }
+  imgEl.style.opacity = "1";
+}
+
+async function syncCount() {
+  const n = await pyodide.runPythonAsync("len(vrel_samples_v)");
+  countEl.textContent = n === 1 ? "1 sample" : `${n} samples`;
+}
+
+async function addSamples(n) {
+  lock();
+  await pyodide.runPythonAsync(`add_samples_v(${n})`);
+  await syncCount();
+  await refresh();
+  unlock();
+}
+
+await refresh();
+
+btn1   .addEventListener("click", () => addSamples(1));
+btn10  .addEventListener("click", () => addSamples(10));
+btn100 .addEventListener("click", () => addSamples(100));
+btn1000.addEventListener("click", () => addSamples(1000));
+
+btnReset.addEventListener("click", async () => {
+  lock();
+  await pyodide.runPythonAsync("reset_samples_v()");
+  await syncCount();
+  await refresh();
+  unlock();
+});
+
+let sliderTimer;
+async function onSliderChange() {
+  speedOut.value = speedSlider.value;
+  hdgOut.value   = hdgSlider.value;
+  sigvOut.value  = sigvSlider.value;
+  clearTimeout(sliderTimer);
+  sliderTimer = setTimeout(async () => {
+    lock();
+    await pyodide.runPythonAsync(
+      `update_scenario_v(${speedSlider.value}, ${hdgSlider.value}, ${sigvSlider.value})`
+    );
+    await pyodide.runPythonAsync("reset_samples_v()");
+    await syncCount();
+    await refresh();
+    unlock();
+  }, 300);
+}
+
+speedSlider.addEventListener("input", onSliderChange);
+hdgSlider  .addEventListener("input", onSliderChange);
+sigvSlider .addEventListener("input", onSliderChange);
+</script>
