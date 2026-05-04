@@ -23,6 +23,21 @@
       pages={112111}
     }
   doi: 10.1016/j.ress.2025.112111
+- title: Probabilistic Recovery Criteria for Robust State-Based Conflict Detection and Resolution under Navigation Uncertainty
+  authors: M. F. Rahman, J. Ellerbroek, J. Hoekstra
+  venue: Elsevier BV
+  year: 2026
+  url: https://doi.org/10.2139/ssrn.6675278
+  bibtex: |
+    @article{Rahman_2026,
+      title={Probabilistic Recovery Criteria for Robust State-Based Conflict Detection and Resolution under Navigation Uncertainty},
+      url={http://dx.doi.org/10.2139/ssrn.6675278},
+      DOI={10.2139/ssrn.6675278},
+      publisher={Elsevier BV},
+      author={Rahman, Muhammad Fazlur and Ellerbroek, Joost and Hoekstra, Jacco},
+      year={2026}
+    }
+  doi: 10.2139/ssrn.6675278
 - title: Modelling ADS-B Reception Probability Using OpenSky Data
   authors: M. F. Rahman, J. Ellerbroek, J. Hoekstra
   venue: Journal of Open Aviation Science
