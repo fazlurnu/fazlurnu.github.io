@@ -663,6 +663,24 @@ pre.bibtex code{
 main > section:nth-child(2){ animation-delay: .05s; }
 main > section:nth-child(3){ animation-delay: .1s; }
 
+.post-body table{
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+  font-size: 0.9em;
+}
+.post-body th,
+.post-body td{
+  border: 1px solid var(--line-strong);
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+}
+.post-body th{
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+.post-body td:not(:first-child){ text-align: right; }
+
 @media (prefers-reduced-motion: reduce){
   *{ animation: none !important; transition: none !important; }
   html{ scroll-behavior: auto; }

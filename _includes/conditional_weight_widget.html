@@ -1,0 +1,222 @@
+<div class="py-widget">
+  <div class="py-widget-header">
+    <span class="py-widget-lang">Python · Interactive</span>
+    <span class="py-widget-status" id="cw-status">Loading runtime…</span>
+  </div>
+
+  <div class="py-widget-controls">
+    <div class="py-slider-row">
+      <label for="cw-rho-slider">Correlation (ρ)</label>
+      <input type="range" id="cw-rho-slider" min="0" max="2" step="1" value="2" disabled>
+      <output id="cw-rho-val">0.67</output>
+    </div>
+    <div class="py-slider-row">
+      <label for="cw-h-slider">Height h (cm)</label>
+      <input type="range" id="cw-h-slider" min="54" max="67" step="0.5" value="60.6" disabled>
+      <output id="cw-h-val">60.6</output>
+    </div>
+  </div>
+
+  <div class="py-widget-plot">
+    <div id="cw-loading-msg">
+      <div class="py-spinner"></div>
+      <span>Loading Python (~10 s on first visit, cached after)</span>
+    </div>
+    <img id="cw-img" alt="Conditional weight distribution" style="display:none;width:100%;border-radius:8px;">
+  </div>
+</div>
+
+<style>
+.py-widget {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.py-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-widget-lang { color: var(--accent); font-weight: 600; }
+.py-widget-status { color: var(--muted); }
+.py-widget-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.py-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-slider-row label { width: 88px; color: var(--text); }
+.py-slider-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.py-slider-row output { width: 34px; text-align: right; color: var(--muted); }
+.py-widget-plot {
+  padding: 16px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.py-widget-plot > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.py-spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: py-spin 0.75s linear infinite;
+}
+@keyframes py-spin { to { transform: rotate(360deg); } }
+</style>
+
+<script type="module">
+if (!window._sharedPyodide) {
+  const { loadPyodide } = await import("https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.mjs");
+  window._sharedPyodide = loadPyodide().then(py => py.loadPackage(["numpy", "matplotlib"]).then(() => py));
+}
+
+const statusEl  = document.getElementById("cw-status");
+const loadingEl = document.getElementById("cw-loading-msg");
+const imgEl     = document.getElementById("cw-img");
+const rhoSlider = document.getElementById("cw-rho-slider");
+const rhoOut    = document.getElementById("cw-rho-val");
+const hSlider   = document.getElementById("cw-h-slider");
+const hOut      = document.getElementById("cw-h-val");
+
+const RHO_STEPS = [0, 1/3, 2/3];
+
+const pyodide = await window._sharedPyodide;
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np, io, base64
+
+def render_conditional(rho, h_obs):
+    MU_W, MU_H = 6.10, 60.6
+    SW, SH     = 0.75, 2.05
+    W_MIN, W_MAX = 2.0, 11.0
+    H_MIN, H_MAX = 48.0, 76.0
+
+    mu_wh  = MU_W + rho * (SW / SH) * (h_obs - MU_H)
+    sig_wh = SW * np.sqrt(1 - rho**2) if rho < 1.0 else 1e-6
+
+    w_grid = np.linspace(W_MIN, W_MAX, 300)
+    h_grid = np.linspace(H_MIN, H_MAX, 300)
+    Wg, Hg = np.meshgrid(w_grid, h_grid)
+    dw = Wg - MU_W
+    dh = Hg - MU_H
+
+    cov     = np.array([[SW**2, rho*SW*SH], [rho*SW*SH, SH**2]])
+    cov_inv = np.linalg.pinv(cov)
+    det     = max(np.linalg.det(cov), 1e-12)
+    D2      = cov_inv[0,0]*dw**2 + 2*cov_inv[0,1]*dw*dh + cov_inv[1,1]*dh**2
+    Z       = np.exp(-0.5 * D2) / (2 * np.pi * np.sqrt(det))
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 7.5),
+                                    gridspec_kw={"height_ratios": [1.4, 1]})
+
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    # --- top: 2D joint ---
+    ax1.contourf(Wg, Hg, Z, levels=20, cmap="Blues")
+    for r, color in zip([1, 2, 3], ["orange", "tomato", "darkred"]):
+        ax1.contour(Wg, Hg, D2, levels=[r**2], colors=[color], linewidths=1.5)
+    h_line = ax1.axhline(h_obs, color="green", lw=2, linestyle="--")
+    ax1.axvline(mu_wh, color="red", lw=1.5, linestyle="--")
+    sc_marginal = ax1.scatter([MU_W],  [MU_H],  color="red",   s=50, zorder=6)
+    sc_cond     = ax1.scatter([mu_wh], [h_obs], color="green", s=70, zorder=7, marker="*")
+    ax1.set_xlim(W_MIN, W_MAX)
+    ax1.set_ylim(H_MIN, H_MAX)
+    ax1.set_xlabel("Weight (kg)", fontsize=11)
+    ax1.set_ylabel("Height (cm)", fontsize=11)
+    ax1.set_title(f"Joint distribution  (ρ = {rho:.2f})", fontsize=12)
+
+    # --- bottom: conditional 1D ---
+    pdf = (np.exp(-0.5 * ((w_grid - mu_wh) / sig_wh)**2)
+           / (sig_wh * np.sqrt(2 * np.pi)))
+    ax2.plot(w_grid, pdf, color="steelblue", lw=2.5)
+    ax2.fill_between(w_grid, pdf, alpha=0.15, color="steelblue")
+    vl_mean = ax2.axvline(mu_wh,          color="red",  lw=1.5, linestyle="--")
+    ax2.axvline(mu_wh - sig_wh, color="gray", lw=1.0, linestyle=":")
+    vl_std  = ax2.axvline(mu_wh + sig_wh, color="gray", lw=1.0, linestyle=":")
+    ax2.set_xlim(W_MIN, W_MAX)
+    ax2.set_ylim(bottom=0)
+    ax2.set_xlabel("Weight (kg)", fontsize=11)
+    ax2.set_ylabel("p(W | H = h)", fontsize=11)
+    ax2.set_title(f"W | H = {h_obs:.1f} cm", fontsize=12)
+
+    # --- combined legend below ax2 ---
+    legend_handles = [
+        Line2D([0], [0], color="green", lw=2, linestyle="--",
+               label=f"H = {h_obs:.1f} cm"),
+        Line2D([0], [0], marker="o", color="w", markerfacecolor="red",
+               markersize=7, label="Marginal mean"),
+        Line2D([0], [0], marker="*", color="w", markerfacecolor="green",
+               markersize=9, label=f"Cond. mean = {mu_wh:.2f} kg"),
+        Line2D([0], [0], color="red", lw=1.5, linestyle="--",
+               label=f"μ(W|H) = {mu_wh:.2f} kg"),
+        Line2D([0], [0], color="gray", lw=1.0, linestyle=":",
+               label=f"σ(W|H) = {sig_wh:.3f} kg"),
+    ]
+    ax2.legend(handles=legend_handles, fontsize=9,
+               loc="upper center", bbox_to_anchor=(0.5, -0.22),
+               ncol=3, frameon=False)
+
+    fig.patch.set_facecolor("white")
+    plt.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode()
+`);
+
+statusEl.textContent = "Ready";
+rhoSlider.disabled = false;
+hSlider.disabled   = false;
+loadingEl.style.display = "none";
+imgEl.style.display     = "block";
+
+async function update() {
+  const rho   = RHO_STEPS[parseInt(rhoSlider.value)];
+  const h_obs = parseFloat(hSlider.value);
+  const b64   = await pyodide.runPythonAsync(`render_conditional(${rho}, ${h_obs})`);
+  imgEl.src   = "data:image/png;base64," + b64;
+}
+
+await update();
+
+let timer;
+function onInput() {
+  rhoOut.value = RHO_STEPS[parseInt(rhoSlider.value)].toFixed(2);
+  hOut.value   = parseFloat(hSlider.value).toFixed(1);
+  clearTimeout(timer);
+  timer = setTimeout(update, 130);
+}
+
+rhoSlider.addEventListener("input", onInput);
+hSlider.addEventListener("input", onInput);
+</script>

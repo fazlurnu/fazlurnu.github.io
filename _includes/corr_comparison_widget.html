@@ -1,0 +1,169 @@
+<div class="py-widget">
+  <div class="py-widget-header">
+    <span class="py-widget-lang">Python · Interactive</span>
+    <span class="py-widget-status" id="corr-status">Loading runtime…</span>
+  </div>
+
+  <div class="py-widget-controls">
+    <div class="py-slider-row">
+      <label for="rho-slider">Correlation (ρ)</label>
+      <input type="range" id="rho-slider" min="0" max="2" step="1" value="0" disabled>
+      <output id="rho-val">0.00</output>
+    </div>
+  </div>
+
+  <div class="py-widget-plot">
+    <div id="corr-loading-msg">
+      <div class="py-spinner"></div>
+      <span>Loading Python (~10 s on first visit, cached after)</span>
+    </div>
+    <img id="corr-img" alt="Correlated 2D Gaussian" style="display:none;width:100%;border-radius:8px;">
+  </div>
+</div>
+
+<style>
+.py-widget {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.py-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-widget-lang { color: var(--accent); font-weight: 600; }
+.py-widget-status { color: var(--muted); }
+.py-widget-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.py-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-slider-row label { width: 88px; color: var(--text); }
+.py-slider-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.py-slider-row output { width: 34px; text-align: right; color: var(--muted); }
+.py-widget-plot {
+  padding: 16px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.py-widget-plot > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.py-spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: py-spin 0.75s linear infinite;
+}
+@keyframes py-spin { to { transform: rotate(360deg); } }
+</style>
+
+<script type="module">
+if (!window._sharedPyodide) {
+  const { loadPyodide } = await import("https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.mjs");
+  window._sharedPyodide = loadPyodide().then(py => py.loadPackage(["numpy", "matplotlib"]).then(() => py));
+}
+
+const statusEl  = document.getElementById("corr-status");
+const loadingEl = document.getElementById("corr-loading-msg");
+const imgEl     = document.getElementById("corr-img");
+const rhoSlider = document.getElementById("rho-slider");
+const rhoOut    = document.getElementById("rho-val");
+
+const RHO_STEPS = [0, 1/3, 2/3];
+
+const pyodide = await window._sharedPyodide;
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np, io, base64
+
+def render_corr(rho):
+    MU_W, MU_H = 6.10, 60.6
+    SW, SH     = 0.75, 2.05
+    W_MIN, W_MAX = 2.0, 11.0
+    H_MIN, H_MAX = 48.0, 76.0
+
+    w = np.linspace(W_MIN, W_MAX, 300)
+    h = np.linspace(H_MIN, H_MAX, 300)
+    W, H = np.meshgrid(w, h)
+    dw = W - MU_W
+    dh = H - MU_H
+
+    cov     = np.array([[SW**2, rho*SW*SH], [rho*SW*SH, SH**2]])
+    cov_inv = np.linalg.inv(cov) if rho < 1.0 else np.linalg.pinv(cov)
+    det     = np.linalg.det(cov)
+    D2      = cov_inv[0,0]*dw**2 + 2*cov_inv[0,1]*dw*dh + cov_inv[1,1]*dh**2
+    Z       = np.exp(-0.5 * D2) / (2 * np.pi * np.sqrt(max(det, 1e-12)))
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.contourf(W, H, Z, levels=20, cmap="Blues")
+    for r, color, label in zip([1, 2, 3], ["orange", "tomato", "darkred"], ["1σ", "2σ", "3σ"]):
+        ax.contour(W, H, D2, levels=[r**2], colors=[color], linewidths=2)
+        ax.plot([], [], color=color, lw=2, label=label)
+    ax.scatter([MU_W], [MU_H], color="red", s=60, zorder=5, label=f"Mean ({MU_W}, {MU_H})")
+    ax.set_xlim(W_MIN, W_MAX)
+    ax.set_ylim(H_MIN, H_MAX)
+    ax.set_xlabel("Weight (kg)", fontsize=11)
+    ax.set_ylabel("Height (cm)", fontsize=11)
+    ax.set_title(f"3-month-old baby — ρ = {rho:.2f}", fontsize=12)
+    ax.legend(fontsize=9, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=4, frameon=False)
+    fig.patch.set_facecolor("white")
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode()
+`);
+
+statusEl.textContent = "Ready";
+rhoSlider.disabled = false;
+loadingEl.style.display = "none";
+imgEl.style.display = "block";
+
+async function update() {
+  const rho = RHO_STEPS[parseInt(rhoSlider.value)];
+  rhoOut.value = rho.toFixed(2);
+  const b64 = await pyodide.runPythonAsync(`render_corr(${rho})`);
+  imgEl.src = "data:image/png;base64," + b64;
+}
+
+await update();
+
+let timer;
+rhoSlider.addEventListener("input", () => {
+  rhoOut.value = RHO_STEPS[parseInt(rhoSlider.value)].toFixed(2);
+  clearTimeout(timer);
+  timer = setTimeout(update, 130);
+});
+</script>

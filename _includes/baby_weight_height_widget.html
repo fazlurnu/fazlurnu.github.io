@@ -1,0 +1,191 @@
+<div class="py-widget">
+  <div class="py-widget-header">
+    <span class="py-widget-lang">Python · Interactive</span>
+    <span class="py-widget-status" id="bwh-status">Loading runtime…</span>
+  </div>
+
+  <div class="py-widget-controls">
+    <div class="py-slider-row">
+      <label for="age-slider">Age (months)</label>
+      <input type="range" id="age-slider" min="1" max="6" step="1" value="1" disabled>
+      <output id="age-val">1</output>
+    </div>
+  </div>
+
+  <div class="py-widget-plot">
+    <div id="bwh-loading-msg">
+      <div class="py-spinner"></div>
+      <span>Loading Python (~10 s on first visit, cached after)</span>
+    </div>
+    <img id="bwh-img" alt="Baby weight and height 2D distribution" style="display:none;width:100%;border-radius:8px;">
+  </div>
+</div>
+
+<style>
+.py-widget {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.py-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-widget-lang { color: var(--accent); font-weight: 600; }
+.py-widget-status { color: var(--muted); }
+.py-widget-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.py-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.py-slider-row label { width: 88px; color: var(--text); }
+.py-slider-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.py-slider-row output { width: 34px; text-align: right; color: var(--muted); }
+.py-widget-plot {
+  padding: 16px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.py-widget-plot > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+.py-spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: py-spin 0.75s linear infinite;
+}
+@keyframes py-spin { to { transform: rotate(360deg); } }
+</style>
+
+<script type="module">
+if (!window._sharedPyodide) {
+  const { loadPyodide } = await import("https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.mjs");
+  window._sharedPyodide = loadPyodide().then(py => py.loadPackage(["numpy", "matplotlib"]).then(() => py));
+}
+
+const statusEl  = document.getElementById("bwh-status");
+const loadingEl = document.getElementById("bwh-loading-msg");
+const imgEl     = document.getElementById("bwh-img");
+const ageSlider = document.getElementById("age-slider");
+const ageOut    = document.getElementById("age-val");
+
+const pyodide = await window._sharedPyodide;
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np, io, base64
+
+AGE_DATA = [
+    (4.35, 0.55, 54.2, 1.85),
+    (5.35, 0.65, 57.8, 1.95),
+    (6.10, 0.75, 60.6, 2.05),
+    (6.70, 0.75, 63.0, 2.15),
+    (7.20, 0.85, 65.0, 2.25),
+    (7.60, 0.85, 66.7, 2.35),
+]
+
+W_MIN, W_MAX = 2.0, 11.0
+H_MIN, H_MAX = 48.0, 76.0
+
+ALL_MEANS_W = [d[0] for d in AGE_DATA]
+ALL_MEANS_H = [d[2] for d in AGE_DATA]
+
+def render(age):
+    idx = int(age) - 1
+    mw, sw, mh, sh = AGE_DATA[idx]
+
+    w = np.linspace(W_MIN, W_MAX, 200)
+    h = np.linspace(H_MIN, H_MAX, 200)
+    W, H = np.meshgrid(w, h)
+
+    D2 = ((W - mw) / sw)**2 + ((H - mh) / sh)**2
+    Z  = np.exp(-0.5 * D2) / (2 * np.pi * sw * sh)
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    ax.contourf(W, H, Z, levels=20, cmap="Blues")
+
+    ax.plot(ALL_MEANS_W, ALL_MEANS_H, color="gray", lw=1.5,
+            linestyle="--", zorder=4, label="Mean trajectory")
+    ax.scatter(ALL_MEANS_W, ALL_MEANS_H, color="gray", s=20, zorder=4)
+    for i, (mw_i, mh_i) in enumerate(zip(ALL_MEANS_W, ALL_MEANS_H)):
+        ax.text(mw_i + 0.1, mh_i + 0.3, str(i + 1), fontsize=8,
+                color="gray", zorder=5)
+
+    t = np.linspace(0, 2 * np.pi, 300)
+    ax.plot(mw + sw * np.cos(t), mh + sh * np.sin(t),
+            color="orange", lw=2, label="1σ")
+    ax.plot(mw + 2 * sw * np.cos(t), mh + 2 * sh * np.sin(t),
+            color="tomato", lw=2, label="2σ")
+    ax.plot(mw + 3 * sw * np.cos(t), mh + 3 * sh * np.sin(t),
+            color="darkred", lw=2, label="3σ")
+
+    ax.scatter([mw], [mh], color="red", s=60, zorder=5, label=f"Mean ({mw} kg, {mh} cm)")
+
+    ax.set_xlim(W_MIN, W_MAX)
+    ax.set_ylim(H_MIN, H_MAX)
+    ax.set_xlabel("Weight (kg)", fontsize=11)
+    ax.set_ylabel("Height (cm)", fontsize=11)
+    label = "month" if age == 1 else "months"
+    ax.set_title(f"Weight & Height distribution — Age {age} {label}", fontsize=12)
+    ax.legend(fontsize=10, loc="upper center", bbox_to_anchor=(0.5, -0.12),
+              ncol=4, frameon=False)
+    fig.patch.set_facecolor("white")
+    plt.tight_layout()
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=130, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode()
+`);
+
+statusEl.textContent = "Ready";
+ageSlider.disabled = false;
+loadingEl.style.display = "none";
+imgEl.style.display = "block";
+
+async function update() {
+  const age = parseInt(ageSlider.value);
+  const b64 = await pyodide.runPythonAsync(`render(${age})`);
+  imgEl.src = "data:image/png;base64," + b64;
+}
+
+await update();
+
+let timer;
+ageSlider.addEventListener("input", () => {
+  ageOut.value = ageSlider.value;
+  clearTimeout(timer);
+  timer = setTimeout(update, 130);
+});
+</script>

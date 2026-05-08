@@ -61,4 +61,6 @@ I excluded two things to play with from this plot: varying the uncertainty model
 
 ## Conclusion
 
-In this paper, we have discussed the state-based conflict detection, navigation uncertainty model, and the forward-propagation of uncertainty. We have seen that when position uncertainty exists, the $\dCPA$ follows a line in the $\dCPA$ space. On the other hand, for velocity uncertainty, it traces an arc in the same space. The mixture of the two, when both position and uncertainty exists, are left to the reader to explore.
+In this post, we have discussed the state-based conflict detection, navigation uncertainty model, and the forward-propagation of uncertainty. We have seen that when position uncertainty exists, the $\dCPA$ follows a line in the $\dCPA$ space. On the other hand, for velocity uncertainty, it traces an arc in the same space. The mixture of the two, when both position and uncertainty exist, is left to the reades to explore.
+
+For citations, please cite the original [paper](https://www.sciencedirect.com/science/article/pii/S0951832025013109).
