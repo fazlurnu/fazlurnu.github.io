@@ -10,6 +10,8 @@ Gemfile.lock
 
 # Private maintenance notes (not published, not committed)
 maintenance.md
+CLAUDE.md
+todo.md
 
 # OS
 .DS_Store
