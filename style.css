@@ -429,6 +429,13 @@ h3{
   color: #333;
   border-radius: 0 8px 8px 0;
 }
+.post-body .footnotes{
+  margin-top: 2.4em;
+  padding-top: 1em;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--muted);
+}
 .back-link{
   display: inline-block;
   margin: 24px 0 8px;

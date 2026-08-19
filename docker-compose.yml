@@ -9,9 +9,9 @@ services:
     command: >
       bash -c "apt-get update -qq &&
                apt-get install -y --no-install-recommends build-essential &&
-               gem install bundler --quiet &&
+               gem install bundler -v 2.3.25 --quiet &&
                bundle install --quiet &&
-               bundle exec jekyll serve --host 0.0.0.0 --livereload"
+               bundle exec jekyll serve --host 0.0.0.0 --livereload --disable-disk-cache"
 
   lab:
     build: .
