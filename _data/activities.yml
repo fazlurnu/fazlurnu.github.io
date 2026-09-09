@@ -1,7 +1,20 @@
 # kind: talk | paper | workshop | service | milestone
+
+- date: "Sep 2026"
+  kind: service
+  text: "I reviewed a paper for <a href='https://www.sciencedirect.com/journal/expert-systems-with-applications'>Expert Systems with Applications</a>"
+
+- date: "Sep 2026"
+  kind: service
+  text: "I reviewed papers for <a href='https://conference.brin.go.id/isast2026/'>ISAST 2026</a>, Indonesia"
+
+- date: "Aug 2026"
+  kind: journal-paper
+  text: "Our <a href='https://www.sciencedirect.com/science/article/pii/S0951832026011221'>paper</a> is published at Journal of Reliability Engineering and System Safety"
+
 - date: "Dec 2025"
   kind: journal-paper
-  text: "Our <a href='https://www-sciencedirect-com.tudelft.idm.oclc.org/science/article/pii/S0951832025013109'>paper</a> is published at Journal of Reliability Engineering and System Safety"
+  text: "Our <a href='https://www.sciencedirect.com/science/article/pii/S0951832025013109'>paper</a> is published at Journal of Reliability Engineering and System Safety"
 
 - date: "Dec 2025"
   kind: award
